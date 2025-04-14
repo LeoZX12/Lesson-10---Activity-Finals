@@ -16,10 +16,10 @@ function generateSuccessRate(roundNumber) {
     return Math.min(0.3 + (roundNumber - 1) * 0.1, 0.9);
 }
 
-function playRound(players, attempts, roundNumber) {
+function playRound(players, roundNumber) {
     const successRate = generateSuccessRate(roundNumber);
     players.forEach(player => {
-        for (let i = 0; i < attempts; i++) {
+        for (let i = 0; i < 5; i++) {
             player.attemptShot(successRate);
         }
     });
@@ -110,6 +110,11 @@ function resetOutputs() {
     document.getElementById('rounds-container').innerHTML = '';
 }
 
+function resetGame() {
+    resetOutputs();
+    document.getElementById('player-list').innerHTML = '';
+}
+
 function playGame() {
     const playerItems = document.getElementById('player-list').children;
     if (playerItems.length < 2) {
@@ -119,11 +124,10 @@ function playGame() {
 
     resetOutputs();
 
-    const attempts = parseInt(document.getElementById('attempts-input').value) || 5;
     const players = Array.from(playerItems).map(item => new Player(item.textContent, ''));
 
     let roundNumber = 1;
-    playRound(players, attempts, roundNumber);
+    playRound(players, roundNumber);
     displayRankings(players, roundNumber);
 
     let rankedPlayers = rankPlayers(players);
@@ -134,7 +138,7 @@ function playGame() {
         showTiebreaker(tiedPlayers, roundNumber);
 
         tiedPlayers.forEach(player => player.score = 0);
-        playRound(tiedPlayers, 3, roundNumber);
+        playRound(tiedPlayers, roundNumber);
         showTiebreakerResults(tiedPlayers, roundNumber);
 
         rankedPlayers = rankPlayers(tiedPlayers);
@@ -200,20 +204,23 @@ document.addEventListener('DOMContentLoaded', function () {
     gameControls.className = 'input-group mb-3';
     inputCardBody.appendChild(gameControls);
 
-    const attemptsInput = document.createElement('input');
-    attemptsInput.id = 'attempts-input';
-    attemptsInput.className = 'form-control';
-    attemptsInput.type = 'number';
-    attemptsInput.value = '5';
-    attemptsInput.min = '1';
-    gameControls.appendChild(attemptsInput);
+    const buttonGroup = document.createElement('div');
+    buttonGroup.className = 'btn-group w-100';
+    gameControls.appendChild(buttonGroup);
 
     const playButton = document.createElement('button');
     playButton.id = 'play-button';
     playButton.className = 'btn btn-success';
     playButton.textContent = 'Play Game';
     playButton.addEventListener('click', playGame);
-    gameControls.appendChild(playButton);
+    buttonGroup.appendChild(playButton);
+
+    const resetButton = document.createElement('button');
+    resetButton.id = 'reset-button';
+    resetButton.className = 'btn btn-danger';
+    resetButton.textContent = 'Reset Game';
+    resetButton.addEventListener('click', resetGame);
+    buttonGroup.appendChild(resetButton);
 
     const outputCard = document.createElement('div');
     outputCard.className = 'card mb-4';
